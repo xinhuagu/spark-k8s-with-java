@@ -1,7 +1,5 @@
 package de.berlin.akang;
 
-import static de.berlin.akang.SparkService.SparkJobStatus.ERROR;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.io.BufferedReader;
@@ -42,8 +40,7 @@ public class SparkService {
     }
 
     log.info("===================================================");
-    log.info("Spark application finished with status:{}", state.get()
-                                                               .name());
+    log.info("Spark application finished with status:{}", state.get().name());
     log.info("Spark application finished with Container Exit code: {}", exitCode);
     log.info("===================================================");
 
