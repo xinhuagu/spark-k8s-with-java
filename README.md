@@ -55,8 +55,7 @@ helm repo add spark-operator https://kubeflow.github.io/spark-operator
 # Install Spark Operator
 helm install spark-operator spark-operator/spark-operator \
   --namespace default \
-  --set webhook.enable=true \
-  --set metrics.enable=true
+  --wait
 
 # Verify installation
 kubectl get pods -n spark-operator
@@ -208,20 +207,6 @@ cd spark-operator && mvn clean package
 
 # Build Spark Orchestrator
 cd spark-orchestrator && mvn clean package
-```
-
-### Testing
-
-```bash
-# Test database connectivity
-kubectl exec -it <postgres-pod> -- psql -U spark -d sparkdb -c "SELECT * FROM users;"
-
-# Test Spark History Server
-curl http://localhost:18080
-
-# Test APIs
-curl http://localhost:8080/api/spark/health  # Spark Operator
-curl http://localhost:8081/q/health         # Spark Orchestrator
 ```
 
 ## 📚 References
