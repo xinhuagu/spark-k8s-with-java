@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: spark-service-account
+  labels:
+    app.kubernetes.io/name: apache-spark
+    app.kubernetes.io/instance: apache-spark
+    app.kubernetes.io/version: v3.2.3

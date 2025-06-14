@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spark-history-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spark-history-server
+  template:
+    metadata:
+      labels:
+        app: spark-history-server
+    spec:
+      containers:
+      - name: spark-history-server
+        image: "apache/spark-py:v3.4.0"
+        imagePullPolicy: IfNotPresent
+        command:
+        - sh
+        - -c
+        - |
+          echo "default:x:$(id -u):$(id -g):Default Application User:${HOME}:/sbin/nologin" >> /etc/passwd
+          /opt/spark/sbin/start-history-server.sh
+        env:
+          - name: SPARK_NO_DAEMONIZE
+            value: "false"
+          - name: SPARK_CONF_DIR
+            value: /opt/spark/conf
+          - name: SPARK_HISTORY_OPTS
+            value: "-Dspark.history.fs.logDirectory=/mnt/spark-history"
+        ports:
+        - containerPort: 18080
+        volumeMounts:
+        - name: spark-event-log
+          mountPath: /mnt/spark-history
+        - name: config-volume
+          mountPath: /opt/spark/conf/spark-defaults.conf
+          subPath: spark-defaults.conf
+        - name: config-volume
+          mountPath: /opt/spark/conf/metrics.properties
+          subPath: metrics.properties
+      volumes:
+      - name: spark-event-log
+        persistentVolumeClaim:
+          claimName: spark-history-pvc
+      - name: config-volume
+        configMap:
+          name: release-name

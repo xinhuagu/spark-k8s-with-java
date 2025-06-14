@@ -1,0 +1,16 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/name: apache-spark
+    app.kubernetes.io/instance: apache-spark
+    app.kubernetes.io/version: v3.2.3
+  name: apache-spark-clusterrole-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: apache-spark-clusterrole
+subjects:
+  - kind: ServiceAccount
+    name: spark-service-account
+    namespace: default
