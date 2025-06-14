@@ -3,7 +3,6 @@ kind: PersistentVolume
 metadata:
   name: spark-history-pv 
 spec:
-  storageClassName: 
   capacity:
     storage: 2Gi
   accessModes:
