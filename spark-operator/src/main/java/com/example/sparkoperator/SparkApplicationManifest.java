@@ -54,6 +54,13 @@ public class SparkApplicationManifest {
     sparkConf.put("spark.executor.instances", "2");
     sparkConf.put("spark.kubernetes.container.image", "xinhua/spark-app:v4");
     sparkConf.put("spark.kubernetes.authenticate.driver.serviceAccountName", "default");
+    sparkConf.put("spark.eventLog.enabled", "true");
+    sparkConf.put("spark.eventLog.dir", "/mnt/spark-history");
+    sparkConf.put("spark.eventLog.compress", "true");
+    sparkConf.put("spark.kubernetes.driver.volumes.persistentVolumeClaim.spark-history-pvc.options.claimName", "spark-history-pvc");
+    sparkConf.put("spark.kubernetes.driver.volumes.persistentVolumeClaim.spark-history-pvc.mount.path", "/mnt/spark-history");
+    sparkConf.put("spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-history-pvc.options.claimName", "spark-history-pvc");
+    sparkConf.put("spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-history-pvc.mount.path", "/mnt/spark-history");
     spec.put("sparkConf", sparkConf);
 
     manifest.put("spec", spec);
