@@ -18,7 +18,6 @@ public class KubernetesConfig {
     try {
       ApiClient apiClient = Config.defaultClient();
       io.kubernetes.client.openapi.Configuration.setDefaultApiClient(apiClient);
-      log.info("Kubernetes API client configured successfully");
       return apiClient;
     } catch (Exception e) {
       log.error("Failed to configure Kubernetes API client", e);
