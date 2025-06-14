@@ -3,16 +3,8 @@ server:
 
 spring:
   application:
-    name: spark-operator-api
+    name: spark-operator
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics
-  endpoint:
-    health:
-      show-details: always
 
 logging:
   level:
@@ -21,8 +13,3 @@ logging:
     org.springframework: INFO
   pattern:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
-
-spark:
-  operator:
-    default-namespace: default
-    default-image: xinhua/spark-app:v4
