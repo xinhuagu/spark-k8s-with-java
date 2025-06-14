@@ -9,7 +9,6 @@ import java.io.InputStreamReader;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.launcher.SparkLauncher;
 
@@ -46,9 +45,10 @@ public class SparkService {
     log.info("===================================================");
 
     if (exitCode == 0) {
-      log.error("Spark application failed with exit code: {}", exitCode);
       return SparkJobStatus.COMPLETED.equals(state.get());
     }
+
+    log.error("Spark application failed with exit code: {}", exitCode);
     return true;
   }
 
