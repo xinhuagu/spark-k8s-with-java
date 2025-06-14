@@ -21,8 +21,8 @@ public class SparkOperatorService {
   private static final String VERSION = "v1beta1";
   private static final String PLURAL = "sparkapplications";
 
-  private CustomObjectsApi customObjectsApi;
-  private ApiClient apiClient;
+  private final CustomObjectsApi customObjectsApi;
+  private final ApiClient apiClient;
 
   public  SparkOperatorService() {
     try {
@@ -44,11 +44,10 @@ public class SparkOperatorService {
      String name =  "demo";
      String sparkAppName = name + "-" + jobId;
 
-    log.info("Submitting SparkApplication name: %s jobId: %s", name, jobId);
+    log.info("Submitting SparkApplication name: {} jobId: {}", name, jobId);
 
     try {
-      // Submit to Kubernetes
-      Object result = customObjectsApi.createNamespacedCustomObject(
+      customObjectsApi.createNamespacedCustomObject(
           GROUP,
           VERSION,
           "default",
@@ -68,7 +67,7 @@ public class SparkOperatorService {
       );
 
     } catch (ApiException e) {
-      log.error("Failed to create SparkApplication: %s, Response: %s",
+      log.error("Failed to create SparkApplication: {}, Response: {}",
           sparkAppName, e.getResponseBody());
       return new SparkApplicationResponse(
           jobId,
@@ -77,7 +76,7 @@ public class SparkOperatorService {
           sparkAppName
       );
     } catch (Exception e) {
-      log.error("Unexpected error creating SparkApplication: %s", sparkAppName);
+      log.error("Unexpected error creating SparkApplication: {}", sparkAppName);
       return new SparkApplicationResponse(
           jobId,
           "FAILED",
@@ -107,10 +106,10 @@ public class SparkOperatorService {
       return new SparkApplicationResponse(jobId, status, message, sparkAppName);
 
     } catch (ApiException e) {
-      log.error("Failed to get SparkApplication status for job: %s", jobId);
+      log.error("Failed to get SparkApplication status for job: {}", jobId);
       return new SparkApplicationResponse(jobId, "ERROR", "Failed to get status: " + e.getMessage(), null);
     } catch (Exception e) {
-      log.error( "Unexpected error getting status for job: %s", jobId);
+      log.error( "Unexpected error getting status for job: {}", jobId);
       return new SparkApplicationResponse(jobId, "ERROR", "Unexpected error: " + e.getMessage(), null);
     }
   }
@@ -119,23 +118,23 @@ public class SparkOperatorService {
     try {
       String sparkAppName = findSparkAppNameByJobId(jobId);
       if (sparkAppName == null) {
-        log.warn("SparkApplication not found for job ID: %s", jobId);
+        log.warn("SparkApplication not found for job ID: {}", jobId);
         return false;
       }
 
-      Object result = customObjectsApi.deleteNamespacedCustomObject(
+     customObjectsApi.deleteNamespacedCustomObject(
           GROUP, VERSION, "default", PLURAL, sparkAppName,
           null, null, null, null, null
       );
 
-      log.info("SparkApplication deleted: %s", sparkAppName);
+      log.info("SparkApplication deleted: {}", sparkAppName);
       return true;
 
     } catch (ApiException e) {
-      log.error("Failed to delete SparkApplication for job: %s", jobId);
+      log.error("Failed to delete SparkApplication for job: {}", jobId);
       return false;
     } catch (Exception e) {
-      log.error( "Unexpected error deleting job: %s", jobId);
+      log.error( "Unexpected error deleting job: {}", jobId);
       return false;
     }
   }
@@ -172,7 +171,7 @@ public class SparkOperatorService {
       return null;
 
     } catch (Exception e) {
-      log.error("Error finding SparkApplication by job ID: %s", jobId);
+      log.error("Error finding SparkApplication by job ID: {}", jobId);
       return null;
     }
   }
@@ -190,7 +189,7 @@ public class SparkOperatorService {
       }
       return "UNKNOWN";
     } catch (Exception e) {
-      log.warn("Error extracting status: %s", e.getMessage());
+      log.warn("Error extracting status: {}", e.getMessage());
       return "UNKNOWN";
     }
   }
@@ -209,7 +208,7 @@ public class SparkOperatorService {
       }
       return "No status available";
     } catch (Exception e) {
-      log.warn("Error extracting message: %s", e.getMessage());
+      log.warn("Error extracting message: {}", e.getMessage());
       return "No status available";
     }
   }
