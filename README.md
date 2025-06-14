@@ -49,16 +49,9 @@ kubectl get services
 #### 2. Install Apache Spark Kubernetes Operator
 
 ```bash
-# Add Spark Operator Helm repository
-helm repo add spark-operator https://kubeflow.github.io/spark-operator
-
-# Install Spark Operator
-helm install spark-operator spark-operator/spark-operator \
-  --namespace default \
-  --wait
-
-# Verify installation
-kubectl get pods -n spark-operator
+helm repo add spark-kubernetes-operator https://apache.github.io/spark-kubernetes-operator
+helm repo update
+helm install spark-kubernetes-operator spark-kubernetes-operator/spark-kubernetes-operator
 ```
 
 
@@ -212,7 +205,7 @@ cd spark-orchestrator && mvn clean package
 ## 📚 References
 
 - [Apache Spark on Kubernetes](https://spark.apache.org/docs/latest/running-on-kubernetes.html)
-- [Spark Kubernetes Operator](https://github.com/kubeflow/spark-operator)
+- [Spark Kubernetes Operator](https://github.com/apache/spark-kubernetes-operator)
 - [Spring Boot](https://spring.io/projects/spring-boot)
 - [Quarkus](https://quarkus.io/)
 
