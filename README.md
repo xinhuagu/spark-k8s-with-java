@@ -1,195 +1,234 @@
-# Spark Demo Application
+# Spark on Kubernetes Demo Project
 
-A Java microservice-based Apache Spark application demonstrating distributed computing capabilities on Kubernetes. This project consists of a Spark orchestrator microservice that triggers Spark jobs on a local Kubernetes cluster.
+This project demonstrates multiple approaches to running Apache Spark applications on Kubernetes, showcasing different submission methods with java microservice frameworks.
 
-## Architecture Overview
-
-The application is built using:
-- **Spark Orchestrator**: A Quarkus-based microservice that manages Spark job execution
-- **Spark Application**: The actual Spark job implementation
-- **Kubernetes Infrastructure**: Database, Spark History Server, and RBAC configurations
-
-## Prerequisites
-
-Before running this application, ensure you have the following installed:
-
-### Required Software
-- Java 17 or higher
-- Maven 3.6+
-- Local Kubernetes cluster
-- kubectl CLI tool
-- Apache Spark 3.5.4
-
-### Local Kubernetes Setup
-
-1. **Start a local Kubernetes cluster with kind or minikube**
-   ```bash
-   # Using kind
-   kind create cluster
-
-   # Or using minikube
-   minikube start
-   ```
-
-### Apache Spark Installation
-
-1. **Download and Install Spark 3.5.4**
-   ```bash
-   # Download Spark 3.5.4
-   wget https://archive.apache.org/dist/spark/spark-3.5.4/spark-3.5.4-bin-hadoop3.tgz
-   
-   # Extract to your preferred location
-   tar -xzf spark-3.5.4-bin-hadoop3.tgz
-   sudo mv spark-3.5.4-bin-hadoop3 /opt/spark
-   ```
-
-2. **Set Environment Variables**
-   ```bash
-   # Add to your ~/.bashrc or ~/.zshrc
-   export SPARK_HOME=/opt/spark
-   export PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin
-   
-   # Reload your shell configuration
-   source ~/.bashrc  # or source ~/.zshrc
-   ```
-
-3. **Verify Spark Installation**
-   ```bash
-   spark-submit --version
-   ```
-
-## Quick Start
-
-### 1. Install Infrastructure
-
-Run the infrastructure installation script to set up the required Kubernetes resources:
-
-```bash
-./install-infra.sh
-```
-
-This script will:
-- Apply Kubernetes RBAC permissions for Spark
-- Deploy PostgreSQL database with persistent storage
-- Deploy Spark History Server
-- Wait for all pods to be ready
-
-### 2. Build and Start the Application
-
-Execute the build and start script:
-
-```bash
-./build-and-start.sh
-```
-
-This script will:
-- Build the Docker image `xinhua/spark-app:v4` using the Quarkus JVM Dockerfile
-- Start the Spark orchestrator microservice in development mode
-- The service will be available at `http://localhost:8080`
-
-### 3. Test the Application
-
-Once the orchestrator is running, trigger a Spark job:
-
-```bash
-curl -X GET http://localhost:8080/spark
-```
-
-This endpoint will:
-- Submit a Spark job to the local Kubernetes cluster
-- Execute the job using the configured Spark application
-- Return the job execution status and results
-
-## Project Structure
+## 📁 Project Structure
 
 ```
 spark-demo/
-├── infra/                          # Kubernetes infrastructure
-│   ├── k8s-permission/            # Spark RBAC configurations
-│   ├── k8s-db/                    # PostgreSQL database setup
-│   └── k8s-history-server/        # Spark History Server
-├── spark-application/             # Spark job implementation
-│   └── src/main/java/             # Java source code
-├── spark-orchestrator/            # Microservice orchestrator
-│   ├── src/main/docker/           # Docker configurations
-│   └── src/main/java/             # Quarkus application
-├── install-infra.sh               # Infrastructure setup script
-├── build-and-start.sh             # Build and start script
-└── README.md                      # This file
+├── infra/          # K8s infrastructure components
+│   ├── k8s-db/             # PostgreSQL database setup
+│   ├── k8s-history-server/ # Spark History Server
+│   └── k8s-permission/     # RBAC permissions for Spark
+├── spark-application/       # Spring Boot Spark application
+├── spark-operator/         # Spring Boot REST API (Apache Spark Operator)
+├── spark-orchestrator/     # Quarkus REST API (Direct K8s submission)
+└── README.md               # This file
 ```
 
-## Development Workflow
+## 🚀 Quick Start
 
-1. **Make changes** to the Spark application or orchestrator
-2. **Stop the running service** (Ctrl+C)
-3. **Rebuild and restart** using `./build-and-start.sh`
-4. **Test changes** using the curl command
+### Prerequisites
 
-## Monitoring and Debugging
+1. **Local Kubernetes cluster** (one of the following):
+   - Docker Desktop with Kubernetes enabled
+   - Minikube
+   - Kind cluster
 
-### Kubernetes Resources
+2. **Tools required**:
+   - `kubectl` configured to access your cluster
+   - `helm` (for Apache Spark Operator installation)
+   - Java 17+
+   - Maven 3.6+
+
+### 🔧 Setup Instructions
+
+#### 1. Apply Infrastructure
+
 ```bash
-# Check pod status
+# Apply all Kubernetes manifests for infrastructure
+kubectl apply -f infrastructure/k8s-db/
+kubectl apply -f infrastructure/k8s-history-server/
+kubectl apply -f infrastructure/k8s-permission/
+
+# Verify infrastructure is running
 kubectl get pods
-
-# View pod logs
-kubectl logs <pod-name>
-
-# Check services
 kubectl get services
 ```
 
-### Spark History Server
-Access the Spark History Server UI at `http://localhost:18080` (if port-forwarded) to monitor job execution.
-
-### Application Logs
-The Quarkus application runs in development mode, providing hot reload and detailed logging in the console.
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Kubernetes not accessible**
-   - Ensure Docker Desktop Kubernetes is enabled
-   - Verify kubectl context: `kubectl config current-context`
-
-2. **SPARK_HOME not set**
-   - Verify environment variable: `echo $SPARK_HOME`
-   - Ensure Spark binaries are in PATH: `which spark-submit`
-
-3. **Pods not starting**
-   - Check pod status: `kubectl get pods`
-   - View detailed events: `kubectl describe pod <pod-name>`
-
-4. **Port conflicts**
-   - Ensure port 8080 is available
-   - Check for running services: `netstat -an | grep 8080`
-
-### Clean Up
-
-To remove all deployed resources:
+#### 2. Install Apache Spark Kubernetes Operator
 
 ```bash
-# Remove Kubernetes resources
-kubectl delete -f infra/k8s-permission/
-kubectl delete -f infra/k8s-db/
-kubectl delete -f infra/k8s-history-server/
+# Add Spark Operator Helm repository
+helm repo add spark-operator https://kubeflow.github.io/spark-operator
 
-# Remove Docker images (optional)
-docker rmi xinhua/spark-app:v4
+# Install Spark Operator
+helm install spark-operator spark-operator/spark-operator \
+  --namespace default \
+  --set webhook.enable=true \
+  --set metrics.enable=true
+
+# Verify installation
+kubectl get pods -n spark-operator
 ```
 
-## Configuration
+#### 3. Build Spark Application Docker Image
 
-### Environment Variables
-- `SPARK_HOME`: Path to Spark installation
-- `KUBECONFIG`: Kubernetes configuration file path (if not using default)
+```bash
+cd spark-application
+mvn clean package
+docker build -t xinhua/spark-app:v4 .
 
-### Application Properties
-- Spark orchestrator configuration: `spark-orchestrator/src/main/resources/application.yml`
-- Spark application configuration: `spark-application/src/main/resources/application.yaml`
+# If using minikube, load image into minikube
+# minikube image load xinhua/spark-app:v4
+```
+
+## 📦 Components Overview
+
+### 🗄️ Infrastructure
+
+**Location**: `infrastructure/`
+
+Contains Kubernetes manifests for supporting services:
+
+- **PostgreSQL Database** (`k8s-db/`): Database with sample user table for Spark queries
+- **Spark History Server** (`k8s-history-server/`): Web UI for monitoring Spark applications
+- **RBAC Permissions** (`k8s-permission/`): Service accounts and roles for Spark workloads
+
+**Services exposed**:
+- PostgreSQL: `postgres-service:5432`
+- Spark History Server: `spark-history-server-service:18080`
+
+### 🎯 Spark Application
+
+**Location**: `spark-application/`  
+**Type**: Spring Boot + Apache Spark
+
+A simple Spark application that:
+- Connects to PostgreSQL database
+- Queries the `users` table
+- Processes data and writes results
+- Demonstrates Spark-PostgreSQL integration
+
+**Key files**:
+- `SparkApplication.java`: Main Spark job logic
+- `SparkService.java`: Business logic for data processing
+- `ConfigProperties.java`: Configuration management
+- `Dockerfile`: Container image definition
+
+**Usage**:
+```bash
+cd spark-application
+mvn clean package
+java -jar target/spark-application-*.jar
+```
+
+### 🎛️ Submit Spark App with operator (Spring Boot)
+
+**Location**: `spark-operator/`  
+**Type**: Spring Boot REST API  
+**Port**: 8080
+
+REST API server that submits Spark applications using the **Apache Spark Kubernetes Operator**.
+
+**Features**:
+- Submit Spark applications via REST API
+- Monitor application status
+- List running applications
+- Delete applications
+- Uses `SparkApplication` CRD
+
+**API Endpoints**:
+```bash
+# Submit Spark application
+GET /spark/submit
+( return a Job ID )
+
+# Check application status
+GET /spark/status/{jobId}
+( return Job status)
+```
+
+**Usage**:
+```bash
+cd spark-operator
+mvn clean package
+mvn spring-boot:run
+
+# Test API
+curl -X GET http://localhost:8080/spark/submit
+```
+
+### ⚡ Submit Spark App without Operator (Quarkus)
+
+**Location**: `spark-orchestrator/`  
+**Type**: Quarkus REST API  
+**Port**: 8080
+
+Lightweight REST API that submits Spark applications **directly to Kubernetes** without using the Spark Operator.
+
+**Features**:
+- Direct Kubernetes API integration
+- Uses `spark-submit` with Kubernetes master
+- Faster submission (no operator dependency)
+- Native compilation support with GraalVM
+
+**API Endpoints**:
+```bash
+# Submit Spark application
+GET /api/spark/submit
+
+```
+
+**Usage**:
+```bash
+cd spark-orchestrator
+mvn clean package
+mvn quarkus:dev
+
+# Test API
+curl -X GET http://localhost:8081/spark/submit
+```
 
 
-## License
+## 🎯 Key Differences
 
-This project is provided as-is for demonstration purposes.
+| Feature | Spark Operator | Spark Orchestrator |
+|---------|----------------|-------------------|
+| **Dependency** | Apache Spark K8s Operator | Direct Kubernetes API |
+| **Submission** | SparkApplication CRD | Native spark-submit |
+| **Monitoring** | Operator status + History Server | Kubernetes pods + History Server |
+| **Performance** | Operator overhead | Direct submission |
+| **Features** | Rich CRD features | Basic submission |
+| **Complexity** | Higher (operator required) | Lower (direct K8s) |
+
+## 🛠️ Development
+
+### Building All Components
+
+```bash
+# Build Spark application
+cd spark-application && mvn clean package
+
+# Build Spark Operator API
+cd spark-operator && mvn clean package
+
+# Build Spark Orchestrator
+cd spark-orchestrator && mvn clean package
+```
+
+### Testing
+
+```bash
+# Test database connectivity
+kubectl exec -it <postgres-pod> -- psql -U spark -d sparkdb -c "SELECT * FROM users;"
+
+# Test Spark History Server
+curl http://localhost:18080
+
+# Test APIs
+curl http://localhost:8080/api/spark/health  # Spark Operator
+curl http://localhost:8081/q/health         # Spark Orchestrator
+```
+
+## 📚 References
+
+- [Apache Spark on Kubernetes](https://spark.apache.org/docs/latest/running-on-kubernetes.html)
+- [Spark Kubernetes Operator](https://github.com/kubeflow/spark-operator)
+- [Spring Boot](https://spring.io/projects/spring-boot)
+- [Quarkus](https://quarkus.io/)
+
+
+## 📄 License
+
+This project is for demonstration purposes. 
