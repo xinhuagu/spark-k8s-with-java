@@ -1,0 +1,117 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-script
+  namespace: default
+data:
+  init.sql: |
+    -- Create demo database
+    CREATE DATABASE demoapp;
+    
+    -- Connect to demo database
+    \c demoapp;
+    
+    -- Create demo tables
+    CREATE TABLE users (
+                           id SERIAL PRIMARY KEY,
+                           username VARCHAR(50) UNIQUE NOT NULL,
+                           email VARCHAR(100) UNIQUE NOT NULL,
+                           first_name VARCHAR(50),
+                           last_name VARCHAR(50),
+                           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                           is_active BOOLEAN DEFAULT true
+    );
+    
+    CREATE TABLE orders (
+                            id SERIAL PRIMARY KEY,
+                            user_id INTEGER REFERENCES users(id),
+                            order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                            total_amount DECIMAL(10,2),
+                            status VARCHAR(20) DEFAULT 'pending'
+    );
+    
+    CREATE TABLE products (
+                              id SERIAL PRIMARY KEY,
+                              name VARCHAR(100) NOT NULL,
+                              description TEXT,
+                              price DECIMAL(10,2),
+                              category VARCHAR(50),
+                              stock_quantity INTEGER DEFAULT 0,
+                              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    
+    CREATE TABLE order_items (
+                                 id SERIAL PRIMARY KEY,
+                                 order_id INTEGER REFERENCES orders(id),
+                                 product_id INTEGER REFERENCES products(id),
+                                 quantity INTEGER NOT NULL,
+                                 unit_price DECIMAL(10,2)
+    );
+    
+    -- Insert demo data
+    INSERT INTO users (username, email, first_name, last_name) VALUES
+                                                                   ('john_doe', 'john.doe@example.com', 'John', 'Doe'),
+                                                                   ('jane_smith', 'jane.smith@example.com', 'Jane', 'Smith'),
+                                                                   ('mike_wilson', 'mike.wilson@example.com', 'Mike', 'Wilson'),
+                                                                   ('sarah_brown', 'sarah.brown@example.com', 'Sarah', 'Brown'),
+                                                                   ('alex_johnson', 'alex.johnson@example.com', 'Alex', 'Johnson');
+    
+    INSERT INTO products (name, description, price, category, stock_quantity) VALUES
+                                                                                  ('Laptop Pro', 'High-performance laptop for professionals', 1299.99, 'Electronics', 50),
+                                                                                  ('Wireless Mouse', 'Ergonomic wireless mouse', 29.99, 'Electronics', 200),
+                                                                                  ('Office Chair', 'Comfortable ergonomic office chair', 249.99, 'Furniture', 25),
+                                                                                  ('Standing Desk', 'Adjustable height standing desk', 399.99, 'Furniture', 15),
+                                                                                  ('Coffee Mug', 'Premium ceramic coffee mug', 12.99, 'Kitchen', 100),
+                                                                                  ('Notebook Set', 'Professional notebook set', 19.99, 'Office', 75),
+                                                                                  ('USB-C Hub', 'Multi-port USB-C hub', 49.99, 'Electronics', 80),
+                                                                                  ('Desk Lamp', 'LED desk lamp with adjustable brightness', 79.99, 'Lighting', 40);
+    
+    INSERT INTO orders (user_id, total_amount, status) VALUES
+                                                           (1, 1329.98, 'completed'),
+                                                           (2, 249.99, 'completed'),
+                                                           (3, 42.98, 'pending'),
+                                                           (1, 399.99, 'shipped'),
+                                                           (4, 92.97, 'completed'),
+                                                           (5, 1299.99, 'processing');
+    
+    INSERT INTO order_items (order_id, product_id, quantity, unit_price) VALUES
+                                                                             (1, 1, 1, 1299.99),
+                                                                             (1, 2, 1, 29.99),
+                                                                             (2, 3, 1, 249.99),
+                                                                             (3, 5, 2, 12.99),
+                                                                             (3, 6, 1, 19.99),
+                                                                             (4, 4, 1, 399.99),
+                                                                             (5, 2, 1, 29.99),
+                                                                             (5, 7, 1, 49.99),
+                                                                             (5, 8, 1, 79.99),
+                                                                             (6, 1, 1, 1299.99);
+    
+    -- Create indexes for better performance
+    CREATE INDEX idx_users_email ON users(email);
+    CREATE INDEX idx_orders_user_id ON orders(user_id);
+    CREATE INDEX idx_orders_status ON orders(status);
+    CREATE INDEX idx_order_items_order_id ON order_items(order_id);
+    CREATE INDEX idx_products_category ON products(category);
+    
+    -- Create a view for order summary
+    CREATE VIEW order_summary AS
+    SELECT
+        o.id as order_id,
+        u.username,
+        u.email,
+        o.order_date,
+        o.total_amount,
+        o.status,
+        COUNT(oi.id) as item_count
+    FROM orders o
+             JOIN users u ON o.user_id = u.id
+             LEFT JOIN order_items oi ON o.id = oi.order_id
+    GROUP BY o.id, u.username, u.email, o.order_date, o.total_amount, o.status;
+    
+    -- Grant permissions (optional)
+    CREATE USER app_user WITH PASSWORD 'app_password';
+    GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO app_user;
+    GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO app_user;
+    
+    -- Display success message
+    SELECT 'Database initialization completed successfully!' as message;

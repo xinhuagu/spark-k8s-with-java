@@ -1,0 +1,15 @@
+spark:
+  master: https://127.0.0.1:6443
+  driver:
+    cores: 1
+    memory: 1024m
+    max-result-size: 1024m
+  executor:
+    cores: 1
+    memory: 1024m
+    instances: 2
+  image:
+    name: xinhua/spark-app
+    tag: latest
+  main-class: de.berlin.akang.SparkApplication
+  sa-name: spark-service-account

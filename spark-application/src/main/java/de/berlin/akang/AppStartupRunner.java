@@ -2,6 +2,8 @@ package de.berlin.akang;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -23,10 +25,17 @@ public class AppStartupRunner implements ApplicationRunner {
             ) {
                 log.info("Spark session started successfully");
                 session.sparkContext().setLogLevel("WARN");
-                session.catalog();
-                session.sql("DROP TABLE IF EXISTS test");
+                Dataset<Row> df = session.read()
+                                     .format("jdbc")
+                                     .option("url", "jdbc:postgresql://postgres-service.default.svc.cluster.local:5432/demoapp")
+                                     .option("dbtable", "users")
+                                     .option("user", "postgres")
+                                     .option("password", "postgres")
+                                     .option("driver", "org.postgresql.Driver")
+                                     .load();
+              df.show(50);
 
-                session.close();
+              session.close();
 
             } catch (Exception e) {
                 log.error("Error during Spark session execution: {}", e.getMessage(), e);

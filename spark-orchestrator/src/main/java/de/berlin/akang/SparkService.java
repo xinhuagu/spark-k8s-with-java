@@ -77,14 +77,23 @@ public class SparkService {
         .setConf("spark.executor.log.level", "ERROR")
         .setConf("spark.kubernetes.namespace", "default")
         .setConf("spark.kubernetes.container.image.pullPolicy", "IfNotPresent")
-        .setConf("spark.kubernetes.container.image", "xinhua/spark-app:v1")
+        .setConf("spark.kubernetes.container.image", "xinhua/spark-app:v3")
         .setConf("spark.kubernetes.authenticate.driver.serviceAccountName", "spark-service-account")
         .setConf("spark.kubernetes.authenticate.executor.serviceAccountName", "spark-service-account")
         .setConf("spark.io.compression.codec", "snappy")
         .setConf("spark.sql.sources.partitionOverwriteMode", "dynamic")
         .setConf("spark.databricks.delta.optimizeWrite.enabled", "true")
-        .setConf("spark.delta.autoOptimize.autoCompact.enabled", "true");
+        .setConf("spark.delta.autoOptimize.autoCompact.enabled", "true")
+        .setConf("spark.kubernetes.executor.deleteOnTermination", "false")
+        .setConf("spark.kubernetes.driver.deleteOnTermination", "false")
+        .setConf("spark.kubernetes.local.dirs.tmpfs", "true");
     // @formatter:on
+
+    for (final var entry : sparkAppProperties.submit().entrySet()) {
+      launcher.setConf("spark.executorEnv." + entry.getKey(), entry.getValue());
+      launcher.setConf("spark.kubernetes.driverEnv." + entry.getKey(), entry.getValue());
+    }
+
     return launcher;
   }
 
