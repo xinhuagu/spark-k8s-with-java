@@ -22,6 +22,11 @@ public class AppStartupRunner implements ApplicationRunner {
                 SparkSession session = sparkService.generateSparkSession()
             ) {
                 log.info("Spark session started successfully");
+                session.sparkContext().setLogLevel("WARN");
+                session.catalog();
+                session.sql("DROP TABLE IF EXISTS test");
+
+                session.close();
 
             } catch (Exception e) {
                 log.error("Error during Spark session execution: {}", e.getMessage(), e);

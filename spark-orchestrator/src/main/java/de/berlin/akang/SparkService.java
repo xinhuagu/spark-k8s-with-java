@@ -58,14 +58,14 @@ public class SparkService {
         """;
     // @formatter:off
     SparkLauncher launcher = new SparkLauncher().setAppName(appName)
-        .setAppResource("local:///opt/spark/work/" + appName + ".jar")
+        .setAppResource("local:///opt/spark/work/demo.jar")
         .setMaster("k8s://" + sparkAppProperties.master())
         .setDeployMode("cluster")
         .setMainClass(sparkAppProperties.mainClass())
         .setVerbose(true)
         .setConf("spark.driver.extraJavaOptions", jvmFlags)
 
-        .setConf("spark.executor.extraClassPath", "local:///opt/spark/work/" + appName + ".jar")
+        .setConf("spark.executor.extraClassPath", "local:///opt/spark/work/demo.jar")
         .setConf("spark.network.timeout", "300")
         .setConf("spark.executor.instances", sparkAppProperties.executor().instances())
         .setConf("spark.executor.cores", sparkAppProperties.executor().cores())
@@ -77,7 +77,7 @@ public class SparkService {
         .setConf("spark.executor.log.level", "ERROR")
         .setConf("spark.kubernetes.namespace", "default")
         .setConf("spark.kubernetes.container.image.pullPolicy", "IfNotPresent")
-        .setConf("spark.kubernetes.container.image", sparkAppProperties.image().name() + ":" + sparkAppProperties.image().tag())
+        .setConf("spark.kubernetes.container.image", "xinhua/spark-app:v1")
         .setConf("spark.kubernetes.authenticate.driver.serviceAccountName", "spark-service-account")
         .setConf("spark.kubernetes.authenticate.executor.serviceAccountName", "spark-service-account")
         .setConf("spark.io.compression.codec", "snappy")
