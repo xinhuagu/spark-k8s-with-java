@@ -72,7 +72,7 @@ public class SparkService {
         .setConf("spark.executor.log.level", "ERROR")
         .setConf("spark.kubernetes.namespace", "default")
         .setConf("spark.kubernetes.container.image.pullPolicy", "IfNotPresent")
-        .setConf("spark.kubernetes.container.image", "xinhua/spark-app:v4")
+        .setConf("spark.kubernetes.container.image", "spark-app:latest")
         .setConf("spark.kubernetes.authenticate.driver.serviceAccountName", "spark-service-account")
         .setConf("spark.kubernetes.authenticate.executor.serviceAccountName", "spark-service-account")
         .setConf("spark.io.compression.codec", "snappy")

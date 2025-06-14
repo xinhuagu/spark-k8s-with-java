@@ -33,5 +33,5 @@ The application uses the default Kubernetes configuration from your `~/.kube/con
 
 ## Docker Image
 
-The default Docker image used is `xinhua/spark-app:v4` as specified in the requirements. You can override this in the request payload.
+The default Docker image used is `spark-app:latest` as specified in the requirements. You can override this in the request payload.
 

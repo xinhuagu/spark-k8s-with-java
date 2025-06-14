@@ -62,15 +62,17 @@ helm install spark-operator spark-operator/spark-operator \
 kubectl get pods -n spark-operator
 ```
 
+
+
 #### 3. Build Spark Application Docker Image
 
 ```bash
 cd spark-application
 mvn clean package
-docker build -t xinhua/spark-app:v4 .
+docker build -t spark-app:latest .
 
 # If using minikube, load image into minikube
-# minikube image load xinhua/spark-app:v4
+# minikube image load spark-app:latest
 ```
 
 ## 📦 Components Overview
@@ -88,6 +90,7 @@ Contains Kubernetes manifests for supporting services:
 **Services exposed**:
 - PostgreSQL: `postgres-service:5432`
 - Spark History Server: `spark-history-server-service:18080`
+- Spark History Server local URL: http://localhost:31000/
 
 ### 🎯 Spark Application
 

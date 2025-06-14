@@ -52,7 +52,7 @@ public class SparkApplicationManifest {
     sparkConf.put("spark.executor.cores", "1");
     sparkConf.put("spark.executor.memory", "1g");
     sparkConf.put("spark.executor.instances", "2");
-    sparkConf.put("spark.kubernetes.container.image", "xinhua/spark-app:v4");
+    sparkConf.put("spark.kubernetes.container.image", "spark-app:latest");
     sparkConf.put("spark.kubernetes.authenticate.driver.serviceAccountName", "default");
     sparkConf.put("spark.eventLog.enabled", "true");
     sparkConf.put("spark.eventLog.dir", "/mnt/spark-history");
