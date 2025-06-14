@@ -19,10 +19,6 @@ public class SparkService {
   private final AtomicReference<SparkJobStatus> state = new AtomicReference<>(
       SparkJobStatus.RUNNING);
 
-  @Inject
-  SparkAppProperties sparkAppProperties;
-
-
   protected enum SparkJobStatus {
     RUNNING, COMPLETED, ERROR
   }
@@ -59,20 +55,19 @@ public class SparkService {
     // @formatter:off
     SparkLauncher launcher = new SparkLauncher().setAppName(appName)
         .setAppResource("local:///opt/spark/work/demo.jar")
-        .setMaster("k8s://" + sparkAppProperties.master())
+        .setMaster("k8s://https://127.0.0.1:6443")
         .setDeployMode("cluster")
-        .setMainClass(sparkAppProperties.mainClass())
+        .setMainClass("de.berlin.akang.SparkApplication")
         .setVerbose(true)
         .setConf("spark.driver.extraJavaOptions", jvmFlags)
 
         .setConf("spark.executor.extraClassPath", "local:///opt/spark/work/demo.jar")
         .setConf("spark.network.timeout", "300")
-        .setConf("spark.executor.instances", sparkAppProperties.executor().instances())
-        .setConf("spark.executor.cores", sparkAppProperties.executor().cores())
-        .setConf("spark.executor.memory", sparkAppProperties.executor().memory())
-        .setConf("spark.driver.cores", sparkAppProperties.driver().cores())
-        .setConf("spark.driver.memory", sparkAppProperties.driver().memory())
-        .setConf("spark.driver.maxResultSize", sparkAppProperties.driver().maxResultSize())
+        .setConf("spark.executor.instances", "1")
+        .setConf("spark.executor.cores", "1")
+        .setConf("spark.executor.memory", "1024m")
+        .setConf("spark.driver.cores", "1")
+        .setConf("spark.driver.memory", "1024m")
         .setConf("spark.driver.log.level", "ERROR")
         .setConf("spark.executor.log.level", "ERROR")
         .setConf("spark.kubernetes.namespace", "default")
@@ -94,11 +89,6 @@ public class SparkService {
         .setConf("spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-history-pvc.options.claimName", "spark-history-pvc")
         .setConf("spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-history-pvc.mount.path", "/mnt/spark-history");
     // @formatter:on
-
-    for (final var entry : sparkAppProperties.submit().entrySet()) {
-      launcher.setConf("spark.executorEnv." + entry.getKey(), entry.getValue());
-      launcher.setConf("spark.kubernetes.driverEnv." + entry.getKey(), entry.getValue());
-    }
 
     return launcher;
   }
