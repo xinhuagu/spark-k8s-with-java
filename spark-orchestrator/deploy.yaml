@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spark-orch
+  labels:
+    app: spark-orch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spark-orch
+  template:
+    metadata:
+      labels:
+        app: spark-orch
+    spec:
+      serviceAccountName: spark-service-account
+      containers:
+        - name: spark-orch
+          image: xinhua/spark-orch:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: QUARKUS_HTTP_HOST
+              value: "0.0.0.0"
+            - name: QUARKUS_LOG_LEVEL
+              value: "INFO"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spark-orch-service
+spec:
+  selector:
+    app: spark-orch
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+  type: ClusterIP
