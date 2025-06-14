@@ -77,7 +77,7 @@ public class SparkService {
         .setConf("spark.executor.log.level", "ERROR")
         .setConf("spark.kubernetes.namespace", "default")
         .setConf("spark.kubernetes.container.image.pullPolicy", "IfNotPresent")
-        .setConf("spark.kubernetes.container.image", "xinhua/spark-app:v3")
+        .setConf("spark.kubernetes.container.image", "xinhua/spark-app:v4")
         .setConf("spark.kubernetes.authenticate.driver.serviceAccountName", "spark-service-account")
         .setConf("spark.kubernetes.authenticate.executor.serviceAccountName", "spark-service-account")
         .setConf("spark.io.compression.codec", "snappy")
@@ -86,7 +86,13 @@ public class SparkService {
         .setConf("spark.delta.autoOptimize.autoCompact.enabled", "true")
         .setConf("spark.kubernetes.executor.deleteOnTermination", "false")
         .setConf("spark.kubernetes.driver.deleteOnTermination", "false")
-        .setConf("spark.kubernetes.local.dirs.tmpfs", "true");
+        .setConf("spark.kubernetes.local.dirs.tmpfs", "true")
+        .setConf("spark.eventLog.enabled", "true")
+        .setConf("spark.eventLog.dir", "/mnt/spark-history")
+        .setConf("spark.kubernetes.driver.volumes.persistentVolumeClaim.spark-history-pvc.options.claimName", "spark-history-pvc")
+        .setConf("spark.kubernetes.driver.volumes.persistentVolumeClaim.spark-history-pvc.mount.path", "/mnt/spark-history")
+        .setConf("spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-history-pvc.options.claimName", "spark-history-pvc")
+        .setConf("spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-history-pvc.mount.path", "/mnt/spark-history");
     // @formatter:on
 
     for (final var entry : sparkAppProperties.submit().entrySet()) {
