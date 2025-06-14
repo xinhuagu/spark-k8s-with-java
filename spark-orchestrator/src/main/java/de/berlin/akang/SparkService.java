@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.launcher.SparkLauncher;
 
@@ -63,6 +64,7 @@ public class SparkService {
         .setMainClass(sparkAppProperties.mainClass())
         .setVerbose(true)
         .setConf("spark.driver.extraJavaOptions", jvmFlags)
+
         .setConf("spark.executor.extraClassPath", "local:///opt/spark/work/" + appName + ".jar")
         .setConf("spark.network.timeout", "300")
         .setConf("spark.executor.instances", sparkAppProperties.executor().instances())
@@ -76,8 +78,8 @@ public class SparkService {
         .setConf("spark.kubernetes.namespace", "default")
         .setConf("spark.kubernetes.container.image.pullPolicy", "IfNotPresent")
         .setConf("spark.kubernetes.container.image", sparkAppProperties.image().name() + ":" + sparkAppProperties.image().tag())
-        .setConf("spark.kubernetes.authenticate.driver.serviceAccountName", sparkAppProperties.saName())
-        .setConf("spark.kubernetes.authenticate.executor.serviceAccountName", sparkAppProperties.saName())
+        .setConf("spark.kubernetes.authenticate.driver.serviceAccountName", "spark-service-account")
+        .setConf("spark.kubernetes.authenticate.executor.serviceAccountName", "spark-service-account")
         .setConf("spark.io.compression.codec", "snappy")
         .setConf("spark.sql.sources.partitionOverwriteMode", "dynamic")
         .setConf("spark.databricks.delta.optimizeWrite.enabled", "true")

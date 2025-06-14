@@ -17,8 +17,21 @@ public interface SparkAppProperties {
   String saName();
 
 
-  record Driver(String cores, String memory, String maxResultSize){}
-  record Executor(String cores, String memory, String instances) {}
-  record Image(String name, String tag) {}
+  interface Driver {
+    String cores();
+    String memory();
+    String maxResultSize();
+  }
+
+  interface Executor {
+    String cores();
+    String memory();
+    String instances();
+  }
+
+  interface Image {
+    String name();
+    String tag();
+  }
 }
 

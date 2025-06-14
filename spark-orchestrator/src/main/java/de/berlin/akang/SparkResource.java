@@ -17,10 +17,10 @@ public class SparkResource {
   @Inject
   SparkService sparkService;
 
-  @POST
-  public Response start(String sparkAppName) {
+  @GET
+  public Response start() {
       try {
-          this.sparkService.submitSparkApp(sparkAppName);
+          this.sparkService.submitSparkApp("demo");
 
           return Response.accepted("Spark job started").build();
       } catch (Exception e) {

@@ -1,0 +1,32 @@
+spark:
+  appName: spark-application
+  fetchsize: 10000
+  local: false
+  checkpoint:
+    directory: staging/checkpoints/
+  hadoopProperties:
+    fs.s3a.fast.upload: true
+    fs.s3a.committer.name: magic
+    fs.s3a.path.style.access: true
+    fs.s3a.connection.ssl.enabled: false
+    fs.s3a.impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+    fs.s3a.secret.key: unused
+  sessionProperties:
+    spark.task.maxFailures: 10
+    spark.databricks.delta.retentionDurationCheck.enabled: false
+    spark.sql.catalog.spark_catalog: 'org.apache.spark.sql.delta.catalog.DeltaCatalog'
+    spark.sql.extensions: "io.delta.sql.DeltaSparkSessionExtension"
+    spark.sql.parquet.datetimeRebaseModeInWrite: CORRECTED
+    spark.sql.parquet.int96RebaseModeInWrite: CORRECTED
+    spark.sql.sources.partitionOverwriteMode: dynamic
+    spark.sql.join.preferSortMergeJoin: true
+    spark.serializer: 'org.apache.spark.serializer.KryoSerializer'
+    spark.kryoserializer.buffer.mb: 24
+    spark.sql.adaptive.enabled: true
+    spark.sql.session.timeZone: UTC
+    spark.cleaner.referenceTracking.cleanCheckpoints: true
+    spark.sql.autoBroadcastJoinThreshold: -1
+    spark.hadoop.mapreduce.input.fileinputformat.list-status.num-threads: 32
+    spark.databricks.delta.schema.autoMerge.enabled: true
+    spark.databricks.delta.vacuum.parallelDelete.enabled: true
+    spark.databricks.delta.merge.enableLowShuffle: true
