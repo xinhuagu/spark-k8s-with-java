@@ -65,6 +65,7 @@ docker build -t spark-app:latest .
 
 # If using minikube, load image into minikube
 # minikube image load spark-app:latest
+# for kind cluster, use: kind load docker-image spark-app:latest --name <cluster-name>
 ```
 
 ## 📦 Components Overview

@@ -48,12 +48,12 @@ public class SparkApplicationManifest {
     // Spark configuration
     Map<String, String> sparkConf = new HashMap<>();
     sparkConf.put("spark.driver.cores", "1");
-    sparkConf.put("spark.driver.memory", "1g");
+    sparkConf.put("spark.driver.memory", "500m");
     sparkConf.put("spark.executor.cores", "1");
-    sparkConf.put("spark.executor.memory", "1g");
+    sparkConf.put("spark.executor.memory", "500m");
     sparkConf.put("spark.executor.instances", "2");
-    sparkConf.put("spark.kubernetes.container.image", "spark-app:latest");
-    sparkConf.put("spark.kubernetes.authenticate.driver.serviceAccountName", "default");
+    sparkConf.put("spark.kubernetes.container.image", "localhost/spark-app:latest");
+    sparkConf.put("spark.kubernetes.authenticate.driver.serviceAccountName", "spark-service-account");
     sparkConf.put("spark.eventLog.enabled", "true");
     sparkConf.put("spark.eventLog.dir", "/mnt/spark-history");
     sparkConf.put("spark.eventLog.compress", "true");
